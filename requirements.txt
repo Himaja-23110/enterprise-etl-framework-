@@ -1,0 +1,7 @@
+apache-airflow==2.8.1
+pandas==2.2.6
+pyspark
+streamlit==1.55.0
+plotly==6.0.0
+sqlalchemy
+pytest
