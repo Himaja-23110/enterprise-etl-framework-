@@ -59,4 +59,4 @@ with DAG(
         python_callable=send_alerts
     )
 
-    health_check >> log_stats >> alert_check
+    health_check >> log_stats >> alert_check 

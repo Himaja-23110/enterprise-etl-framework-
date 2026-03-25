@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Enterprise ETL Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f5f7fa; color: #333; }
+
+        .navbar {
+            background: #fff;
+            padding: 16px 32px;
+            border-bottom: 2px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar h1 { font-size: 20px; color: #1a73e8; }
+        .navbar span { font-size: 13px; color: #888; }
+        .badge { background: #e6f4ea; color: #2e7d32; padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+
+        .container { padding: 30px; max-width: 1200px; margin: auto; }
+
+        .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            border-top: 4px solid #1a73e8;
+        }
+        .card .icon { font-size: 28px; margin-bottom: 8px; }
+        .card .value { font-size: 30px; font-weight: bold; color: #1a73e8; }
+        .card .label { font-size: 13px; color: #888; margin-top: 4px; }
+        .card .delta { font-size: 12px; color: #2e7d32; margin-top: 4px; }
+
+        .section { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+        .section h2 { font-size: 16px; color: #333; margin-bottom: 16px; border-left: 4px solid #1a73e8; padding-left: 10px; }
+
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f5f7fa; padding: 12px; text-align: left; font-size: 13px; color: #888; }
+        td { padding: 12px; font-size: 14px; border-bottom: 1px solid #f0f0f0; }
+        tr:hover td { background: #f9f9f9; }
+        .success { color: #2e7d32; font-weight: bold; }
+
+        .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .chart-box { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+        .chart-box h3 { font-size: 14px; color: #888; margin-bottom: 16px; }
+
+        .log { padding: 10px 16px; border-radius: 8px; margin-bottom: 8px; font-size: 13px; display: flex; gap: 16px; background: #f5f7fa; border-left: 4px solid #1a73e8; }
+        .log-time { color: #888; min-width: 160px; }
+        .log-msg { color: #333; }
+
+        .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 10px; font-size: 14px; }
+        .alert-success { background: #e6f4ea; color: #2e7d32; border-left: 4px solid #2e7d32; }
+        .alert-danger { background: #fce8e6; color: #c62828; border-left: 4px solid #c62828; }
+        .alert-info { background: #e8f0fe; color: #1a73e8; border-left: 4px solid #1a73e8; }
+
+        .tabs { display: flex; gap: 8px; margin-bottom: 24px; }
+        .tab { padding: 8px 20px; border-radius: 8px; cursor: pointer; background: #fff; border: 1px solid #e0e0e0; color: #888; font-size: 14px; }
+        .tab.active, .tab:hover { background: #1a73e8; color: #fff; border-color: #1a73e8; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .footer { text-align: center; padding: 20px; color: #888; font-size: 13px; border-top: 1px solid #e0e0e0; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <div>
+        <h1>🚀 Enterprise ETL Pipeline Dashboard</h1>
+        <span>Infosys Springboard | Apache Airflow + PySpark + Streamlit</span>
+    </div>
+    <div style="display:flex; gap:10px; align-items:center;">
+        <span class="badge">✅ All Milestones Complete</span>
+        <span style="color:#888; font-size:13px;" id="clock"></span>
+    </div>
+</div>
+
+<div class="container">
+
+    <div class="tabs">
+        <div class="tab active" onclick="showTab('overview', this)">📊 Overview</div>
+        <div class="tab" onclick="showTab('pipeline', this)">🔄 Pipeline Status</div>
+        <div class="tab" onclick="showTab('data', this)">📈 Data Analysis</div>
+        <div class="tab" onclick="showTab('logs', this)">📋 Logs & Alerts</div>
+    </div>
+
+    <!-- Overview -->
+    <div id="overview" class="tab-content active">
+        <div class="metrics">
+            <div class="card"><div class="icon">🗂️</div><div class="value">3</div><div class="label">Total DAGs</div><div class="delta">↑ All Active</div></div>
+            <div class="card"><div class="icon">📈</div><div class="value">90%</div><div class="label">Success Rate</div><div class="delta">↑ +10%</div></div>
+            <div class="card"><div class="icon">⏱️</div><div class="value">1m 25s</div><div class="label">Avg Duration</div><div class="delta">↓ Faster</div></div>
+            <div class="card"><div class="icon">📦</div><div class="value">12</div><div class="label">Total Runs</div><div class="delta">↑ +2 today</div></div>
+        </div>
+
+        <div class="section">
+            <h2>🏆 Milestone Progress</h2>
+            <table>
+                <tr><th>Milestone</th><th>DAG Name</th><th>Status</th><th>Runs</th><th>Last Run</th></tr>
+                <tr><td>M1 - Environment Setup</td><td>enterprise_etl_pipeline</td><td class="success">✅ Complete</td><td>8</td><td>2026-03-20</td></tr>
+                <tr><td>M2 - Data Cleaning</td><td>clean_transform_load</td><td class="success">✅ Complete</td><td>2</td><td>2026-03-20</td></tr>
+                <tr><td>M3 - Orchestration</td><td>monitoring_dag</td><td class="success">✅ Complete</td><td>2</td><td>2026-03-20</td></tr>
+                <tr><td>M4 - Deployment</td><td>dashboard.html</td><td class="success">✅ Complete</td><td>1</td><td>2026-03-21</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pipeline -->
+    <div id="pipeline" class="tab-content">
+        <div class="charts">
+            <div class="chart-box"><h3>DAG Run Results</h3><canvas id="barChart"></canvas></div>
+            <div class="chart-box"><h3>Overall Success Rate</h3><canvas id="pieChart"></canvas></div>
+        </div>
+    </div>
+
+    <!-- Data Analysis -->
+    <div id="data" class="tab-content">
+        <div class="charts">
+            <div class="chart-box"><h3>Records Per Stage</h3><canvas id="lineChart"></canvas></div>
+            <div class="chart-box"><h3>Duration Per Stage (s)</h3><canvas id="durationChart"></canvas></div>
+        </div>
+    </div>
+
+    <!-- Logs -->
+    <div id="logs" class="tab-content">
+        <div class="section">
+            <h2>📋 Pipeline Logs</h2>
+            <div class="log"><span class="log-time">2026-03-20 11:13:53</span><span class="log-msg">enterprise_etl_pipeline — SUCCESS ✅</span></div>
+            <div class="log"><span class="log-time">2026-03-20 17:47:46</span><span class="log-msg">clean_transform_load — SUCCESS ✅</span></div>
+            <div class="log"><span class="log-time">2026-03-20 18:29:04</span><span class="log-msg">monitoring_dag — SUCCESS ✅</span></div>
+            <div class="log"><span class="log-time">2026-03-20 18:29:04</span><span class="log-msg">Health check passed!</span></div>
+            <div class="log"><span class="log-time">2026-03-20 18:29:04</span><span class="log-msg">Alert system operational!</span></div>
+        </div>
+        <div class="section">
+            <h2>🔔 Alert Configuration</h2>
+            <div class="alert alert-success">✅ on_success_callback — Configured & Active</div>
+            <div class="alert alert-danger">🔴 on_failure_callback — Configured & Active</div>
+            <div class="alert alert-info">📧 SLA Miss Alert — Configured & Active</div>
+        </div>
+    </div>
+
+</div>
+
+<div class="footer">🎓 Infosys Springboard Internship | Enterprise ETL Framework | All 4 Milestones Complete ✅</div>
+
+<script>
+    setInterval(() => { document.getElementById('clock').textContent = new Date().toLocaleString(); }, 1000);
+
+    function showTab(id, el) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        el.classList.add('active');
+    }
+
+    new Chart(document.getElementById('barChart'), {
+        type: 'bar',
+        data: {
+            labels: ['enterprise_etl_pipeline', 'clean_transform_load', 'monitoring_dag'],
+            datasets: [
+                { label: 'Success', data: [8, 2, 2], backgroundColor: '#34a853' },
+                { label: 'Failed', data: [2, 0, 0], backgroundColor: '#ea4335' }
+            ]
+        },
+        options: { plugins: { legend: { labels: { color: '#333' } } } }
+    });
+
+    new Chart(document.getElementById('pieChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Success', 'Failed'],
+            datasets: [{ data: [12, 2], backgroundColor: ['#34a853', '#ea4335'] }]
+        }
+    });
+
+    new Chart(document.getElementById('lineChart'), {
+        type: 'line',
+        data: {
+            labels: ['Extract', 'Transform', 'Clean', 'Load'],
+            datasets: [{ label: 'Records', data: [10000, 9800, 9600, 9500], borderColor: '#1a73e8', backgroundColor: 'rgba(26,115,232,0.1)', fill: true, tension: 0.4 }]
+        }
+    });
+
+    new Chart(document.getElementById('durationChart'), {
+        type: 'bar',
+        data: {
+            labels: ['Extract', 'Transform', 'Clean', 'Load'],
+            datasets: [{ label: 'Seconds', data: [15, 30, 20, 10], backgroundColor: ['#1a73e8', '#34a853', '#fbbc04', '#ea4335'] }]
+        }
+    });
+</script>
+</body>
+</html>
